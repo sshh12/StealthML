@@ -11,30 +11,25 @@ import utils
 import model as modellib
 import visualize
 
-# Root directory of the project
+from config import Config
+
 ROOT_DIR = os.getcwd()
 
-# Directory to save logs and trained model
 MODEL_DIR = os.path.join(ROOT_DIR, "logs")
 
-# Local path to trained weights file
 COCO_MODEL_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
-# Download COCO trained weights from Releases if needed
+
 if not os.path.exists(COCO_MODEL_PATH):
     utils.download_trained_weights(COCO_MODEL_PATH)
 
-# Directory of images to run detection on
-IMAGE_DIR = os.path.join(ROOT_DIR, "images")
-
-from config import Config
 
 class InferenceConfig(Config):
     BACKBONE_SHAPES                = [[256, 256], [128, 128], [64, 64], [32, 32], [16, 16]]
     BACKBONE_STRIDES               = [4, 8, 16, 32, 64]
     BATCH_SIZE                     = 1
     BBOX_STD_DEV                   = [0.1, 0.1, 0.2, 0.2]
-    DETECTION_MAX_INSTANCES        = 100
-    DETECTION_MIN_CONFIDENCE       = 0.5
+    DETECTION_MAX_INSTANCES        = 80
+    DETECTION_MIN_CONFIDENCE       = 0.85
     DETECTION_NMS_THRESHOLD        = 0.3
     GPU_COUNT                      = 1
     IMAGES_PER_GPU                 = 1
@@ -68,16 +63,8 @@ class InferenceConfig(Config):
     WEIGHT_DECAY                   = 0.0001
     
 config = InferenceConfig()
-config.display()
 
-
-# ## Create Model and Load Trained Weights
-
-
-# Create model object in inference mode.
 model = modellib.MaskRCNN(mode="inference", model_dir=MODEL_DIR, config=config)
-
-# Load weights trained on MS-COCO
 model.load_weights(COCO_MODEL_PATH, by_name=True)
 
 class_names = ['BG', 'person', 'bicycle', 'car', 'motorcycle', 'airplane',
@@ -96,23 +83,59 @@ class_names = ['BG', 'person', 'bicycle', 'car', 'motorcycle', 'airplane',
                'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors',
                'teddy bear', 'hair drier', 'toothbrush']
 
+## END SETUP ##
 
-# ## Run Object Detection
+from PIL import Image
+from PIL import ImageFont
+from PIL import ImageDraw 
 
-# In[10]:
+import cv2
 
+cap = cv2.VideoCapture("http://10.0.0.11:4747/mjpegfeed?960x720")
 
-# Load a random image from the images folder
-filename = r'<filename>'
-image = skimage.io.imread(filename)
+cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
-# Run detection
-results = model.detect([image], verbose=1)
+colors = visualize.random_colors(len(class_names))
 
-# Visualize results
-r = results[0]
-visualize.display_instances(image, r['rois'], r['masks'], r['class_ids'], 
-                            class_names, r['scores'])
+def bbox(img):
+    
+    rows = np.any(img, axis=1)
+    cols = np.any(img, axis=0)
+    rmin, rmax = np.where(rows)[0][[0, -1]]
+    cmin, cmax = np.where(cols)[0][[0, -1]]
 
+    return rmin, rmax, cmin, cmax
 
+while True:
 
+    for i in range(25): # B/c buffer
+
+        ret, frame = cap.read()
+
+    image = frame
+
+    results = model.detect([image], verbose=0)
+    r = results[0]
+
+    for i, class_id in enumerate(r['class_ids']):
+
+        visualize.apply_mask(image, r['masks'][:, :, i], colors[class_id])
+
+    img = Image.fromarray(image)
+    draw = ImageDraw.Draw(img)
+
+    for i, class_id in enumerate(r['class_ids']):
+
+        y, y2, x, x2 = bbox(r['masks'][:, :, i])
+
+        draw.text(((x + x2) / 2, (y + y2) / 2), class_names[class_id] + " " + str(round(r['scores'][i], 2)), (0, 255, 0))
+
+    image = np.array(img)
+
+    cv2.imshow('Live Seg', image)
+
+    if cv2.waitKey(1) == 27:
+        cv2.destroyAllWindows()
+        break
+    
+    
