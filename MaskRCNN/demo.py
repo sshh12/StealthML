@@ -103,7 +103,7 @@ class_names = ['BG', 'person', 'bicycle', 'car', 'motorcycle', 'airplane',
 
 
 # Load a random image from the images folder
-filename = r'<filename>'
+filename = r'test.jpg'
 image = skimage.io.imread(filename)
 
 # Run detection

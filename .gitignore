@@ -102,3 +102,4 @@ ENV/
 
 # This repo
 mask_rcnn_coco.h5
+model_mscoco
