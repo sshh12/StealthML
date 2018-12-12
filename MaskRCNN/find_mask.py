@@ -1,3 +1,11 @@
+"""
+Mask R-CNN
+
+Copyright (c) 2017 Matterport, Inc.
+Licensed under the MIT License (see LICENSE for details)
+Written by Waleed Abdulla
+"""
+
 import os
 import sys
 import random
@@ -81,6 +89,10 @@ class_names = ['BG', 'person', 'bicycle', 'car', 'motorcycle', 'airplane',
                'keyboard', 'cell phone', 'microwave', 'oven', 'toaster',
                'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors',
                'teddy bear', 'hair drier', 'toothbrush']
+
+"""
+StealthML
+"""
 
 def find(img, class_name):
 

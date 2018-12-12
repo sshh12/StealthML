@@ -1,3 +1,16 @@
+"""
+Taken from adamstseng/general-deep-image-completion
+
+Based on:
+
+@inproceedings{tseng17general-deep,
+ author = {Ching-Wei Tseng and Hung-Jin Lin and Shang-Hong Lai},
+ booktitle = {Proceedings of the British Machine Vision Conference ({BMVC})},
+ title = {General Deep Image Completion with Lightweight Conditional Generative Adversarial Networks},
+ year = {2017}
+}
+"""
+
 import tensorflow as tf
 import numpy as np
 
