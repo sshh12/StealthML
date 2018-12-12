@@ -11,19 +11,13 @@ import utils
 import model as modellib
 import visualize
 
-# Root directory of the project
-ROOT_DIR = os.getcwd()
-
-# Directory to save logs and trained model
+ROOT_DIR = os.path.join(os.getcwd(), 'MaskRCNN')
 MODEL_DIR = os.path.join(ROOT_DIR, "logs")
-
-# Local path to trained weights file
 COCO_MODEL_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
-# Download COCO trained weights from Releases if needed
+
 if not os.path.exists(COCO_MODEL_PATH):
     utils.download_trained_weights(COCO_MODEL_PATH)
 
-# Directory of images to run detection on
 IMAGE_DIR = os.path.join(ROOT_DIR, "images")
 
 from config import Config
@@ -68,16 +62,8 @@ class InferenceConfig(Config):
     WEIGHT_DECAY                   = 0.0001
     
 config = InferenceConfig()
-config.display()
 
-
-# ## Create Model and Load Trained Weights
-
-
-# Create model object in inference mode.
 model = modellib.MaskRCNN(mode="inference", model_dir=MODEL_DIR, config=config)
-
-# Load weights trained on MS-COCO
 model.load_weights(COCO_MODEL_PATH, by_name=True)
 
 class_names = ['BG', 'person', 'bicycle', 'car', 'motorcycle', 'airplane',
@@ -96,23 +82,20 @@ class_names = ['BG', 'person', 'bicycle', 'car', 'motorcycle', 'airplane',
                'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors',
                'teddy bear', 'hair drier', 'toothbrush']
 
+def find(img, class_name):
 
-# ## Run Object Detection
+    results = model.detect([img], verbose=0)[0]
 
-# In[10]:
+    class_idx = class_names.index(class_name.lower())
 
+    mask = np.zeros(img.shape[:2])
 
-# Load a random image from the images folder
-filename = r'test.jpg'
-image = skimage.io.imread(filename)
+    for i, class_id in enumerate(results['class_ids']):
 
-# Run detection
-results = model.detect([image], verbose=1)
+        if class_idx == class_id:
 
-# Visualize results
-r = results[0]
-visualize.display_instances(image, r['rois'], r['masks'], r['class_ids'], 
-                            class_names, r['scores'])
+            nonzero_idxs = np.nonzero(results['masks'][:, :, i])
+            mask[nonzero_idxs] = 1
 
-
+    return mask
 
