@@ -1,3 +1,10 @@
+"""
+Stealthify an image.
+
+The CLI script takes and image and the name of an object
+(ex. 'zebra') and returns the image without that object.
+"""
+
 # Use lib as if they were installed
 import sys
 sys.path.insert(0, "./InPainting")
