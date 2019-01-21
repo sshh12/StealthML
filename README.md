@@ -47,4 +47,8 @@ Currently using cGANs from [adamstseng / general-deep-image-completion](https://
 
 ## Results
 
-```TODO```
+If you ignore the *suddle* lighting deviations, the low FPS, the frame with the umbrella visable, and the fact that this was taking advantage of a static background rather than actual in-painting...this worked pretty well.
+
+#### Cloaking Umbrella POC
+
+![bad gif](https://user-images.githubusercontent.com/6625384/51450883-87f9a080-1d00-11e9-98d6-4f5983bdb5b8.gif)
